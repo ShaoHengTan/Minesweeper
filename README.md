@@ -1,10 +1,14 @@
 # Minesweeper
  Minesweeper game in Java
 
+
+
+
 Required Java version : 17
 
 How to run: 
-Step
+Steps
+
 0)Either export the code into a JAR file (using IDE), or use the included Jar file. At the 
 1) Open command prompt and navigate to the folder path containing the JAR
    -or-
