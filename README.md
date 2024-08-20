@@ -20,4 +20,5 @@ How to run:
 Note: 
 
 -Java 17 needs to be installed in the system and added to PATH variables for the command line command 'java' to run.
+
 -Standalone/portable Java can also be used. If so, before step (3) , simply run "setlocal" then "path=<PATH OF STANDALONE>;%path%". After which you can do step (3)
