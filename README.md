@@ -16,6 +16,8 @@ How to run:
 
 3) In Cmd run the following command "java -jar <path>\Minesweeper-app.jar". For example "java -jar D:\Program Files\Minesweeper-app\Release\Minesweeper-app.jar" or "java -jar Minesweeper-app.jar".
 
+
 Note: 
--Java 17 needs to be installed in the system and added to PATH variables for the command line command 'java' to run
+
+-Java 17 needs to be installed in the system and added to PATH variables for the command line command 'java' to run.
 -Standalone/portable Java can also be used. If so, before step (3) , simply run "setlocal" then "path=<PATH OF STANDALONE>;%path%". After which you can do step (3)
