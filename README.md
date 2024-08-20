@@ -8,7 +8,7 @@ Required Java version : 17
 
 How to run: 
 
-1)Either export the code into a JAR file (using IDE), or use the included Jar file. 
+1) Either export the code into a JAR file (using IDE), or use the included Jar file. 
 
 2) Open command prompt and navigate to the folder path containing the JAR.
    -or-
