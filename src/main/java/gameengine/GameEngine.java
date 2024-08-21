@@ -41,7 +41,7 @@ public enum GameEngine {
 		System.err.println("Gameboard Setup.");
 		
 		renderer.renderSetupBoard();
-		int gridSize = scanner.nextInt();
+		var gridSize = scanner.nextInt();
 		
 		boolean minesCountInValid = true;
 		int numMines = -1;
