@@ -1,11 +1,23 @@
 package gameboard;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+//The individual cell objects in the grid on the gameboard, could have used record type too
+@Getter
+@Setter
+@NoArgsConstructor
 public class Cell {
 
+		private int row,col;
 	    private boolean isMine;
 	    private boolean revealed;
 	    private int adjacentMines;
+	    	
 
+	    /*
 	    public Cell() {
 	        this.isMine = false;
 	        this.revealed = false;
@@ -20,9 +32,7 @@ public class Cell {
 	        return isMine;
 	    }
 
-	    public void reveal() {
-	        this.revealed = true;
-	    }
+	    
 
 	    public boolean isRevealed() {
 	        return revealed;
@@ -35,5 +45,5 @@ public class Cell {
 	    public int getAdjacentMines() {
 	        return adjacentMines;
 	    }
-	
+	*/
 }

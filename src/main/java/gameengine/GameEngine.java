@@ -2,9 +2,13 @@ package gameengine;
 
 import java.util.Scanner;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
+import Inputs.UserInput;
 import renderer.Renderer;
+import gameboard.Cell;
 import gameboard.GameBoard;
-import gameboard.GameBoard.minesCountException;
+
 
 
 //singleton game engine, using enum type
@@ -36,14 +40,54 @@ public enum GameEngine {
 		
 		renderer.setEditorMode(true);//displays all cells
 	}
-	
+	public boolean void checkUserGridInput(String gridInput) {
+			renderer.renderSetupBoard();
+			gridSizeInput = scanner.nextLine().replaceAll("\\s", "");
+			
+			if(NumberUtils.isParsable(gridSizeInput))
+			{
+				System.err.println("gridSizeInput is parsable:"+gridSizeInput+".");
+				gridSize = Integer.parseInt(gridSizeInput);
+				gridCountIsValid = GameBoard.validateGrid(gridSize, gridSize,gameBoard.getMaxRows(),gameBoard.getMaxCols());
+			}
+			
+			else
+			{
+				System.err.println("gridSize is not parsable");
+			}
+			
+		return 
+	}
 	public void gameSetup() {
 		System.err.println("Gameboard Setup.");
 		
-		renderer.renderSetupBoard();
-		var gridSize = scanner.nextInt();
+		boolean gridCountIsValid = false;
+		String gridSizeInput;
+		int gridSize = 0;
+		do
+		{
+			renderer.renderSetupBoard();
+			gridSizeInput = scanner.nextLine().replaceAll("\\s", ""); //deletes any spaces in the input, be it in front , behind, or inbetween
+			
+			if(NumberUtils.isParsable(gridSizeInput))
+			{
+				System.err.println("gridSizeInput is parsable:"+gridSizeInput+".");
+				gridSize = Integer.parseInt(gridSizeInput);
+				gridCountIsValid = GameBoard.validateGrid(gridSize, gridSize,gameBoard.getMaxRows(),gameBoard.getMaxCols());
+			}
+			else
+			{
+				System.err.println("gridSize is not parsable");
+			}
+			
+			
+			
+		}
+		while(!gridCountIsValid);
+	
 		
-		boolean minesCountInValid = true;
+		//gridSize.
+		boolean minesCountIsValid = false;
 		int numMines = -1;
 		
 		do
@@ -52,11 +96,11 @@ public enum GameEngine {
 			numMines = scanner.nextInt();
 			
 			//validateParameters returns true when its valid 
-			minesCountInValid = !GameBoard.validateMineCount(gridSize, gridSize, numMines);
+			minesCountIsValid = GameBoard.validateMineCount(gridSize, gridSize, numMines);
 			
 
 		}
-		while(minesCountInValid);
+		while(!minesCountIsValid);
 	
 
 		
@@ -64,7 +108,7 @@ public enum GameEngine {
 		setGameState(GameStates.ONGOING);
 	}
 	
-	public void startGame() {
+	public void gameInProgress() {
 		System.err.println("Game started.");
 		
 		if(gameBoard==null)
@@ -73,6 +117,46 @@ public enum GameEngine {
 			setGameState(GameStates.TERMINATE);
 			return;
 		}
+		
+		
+		
+		renderer.startGame(gameBoard);
+
+		
+		boolean cellInputIsValid = false;
+		
+		do
+		{
+			Cell cell = UserInput.getUserCellInput();
+			
+	
+			//validateParameters returns true when its valid 
+			cellInputIsValid = GameBoard.validateInputtedCell(cell);
+			
+			renderer.update(gameBoard);
+		}
+		while(!cellInputIsValid);
+		
+		
+		boolean steppedOnMine = false;
+		boolean allCellsOpened = false;
+		
+		int numMines = -1;
+		
+		do
+		{
+			Cell cell = UserInput.getUserCellInput();
+			
+			
+			
+			//validateParameters returns true when its valid 
+			//minesCountIsValid = GameBoard.validateMineCount(gridSize, gridSize, numMines);
+			
+			renderer.update(gameBoard);
+		}
+		while(steppedOnMine == false && allCellsOpened == false);
+		
+		
 		
 		setGameState(GameStates.TERMINATE);
 	}
@@ -92,8 +176,8 @@ public enum GameEngine {
                     break;
                     
 				case ONGOING:
-					startGame();
-					renderer.update(gameBoard);
+					gameInProgress();
+					//renderer.update(gameBoard);
 					break;
 				default:
 					break;
