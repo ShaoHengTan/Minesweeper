@@ -4,7 +4,7 @@
 
 How to run: 
 1) Download the whole Release Folder. 
-2) Run the rungame.bat.
+2) Either extract the rungame.zip and run the rungame.bat 
   -or-
 2) Open command prompt and navigate to the folder path containing the JAR.
 3) Run the following command "java -jar Minesweeper-app.jar" or "java -jar (path)\Minesweeper-app.jar". For example "java -jar D:\Program Files\Minesweeper-app\Release\Minesweeper-app.jar".
