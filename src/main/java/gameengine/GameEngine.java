@@ -1,6 +1,19 @@
 package gameengine;
 
-import java.util.Scanner;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.print.DocFlavor.URL;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -8,211 +21,261 @@ import Inputs.UserInput;
 import renderer.Renderer;
 import gameboard.Cell;
 import gameboard.GameBoard;
-
-
+import propertiesloader.PropertiesLoader;
 
 //singleton game engine, using enum type
 public enum GameEngine {
 	INSTANCE;
-	
-	Renderer renderer; //this class is to display the game, currently would be printed into command line
+
+	Renderer renderer; // this class is to display the game, currently would be printed into command
+						// line
 	GameBoard gameBoard = null;
-	
-	Scanner scanner = new Scanner(System.in);
-	
-	//this ensures the singleton nature and INSTANCE can be used to call the functions
+	int numberOfMovesMade = 0;
+
+	PropertiesLoader propertiesLoader=null;
+	boolean editorMode = false;
+	private void loadProperties() {
+		
+		propertiesLoader = new PropertiesLoader("game.properties");
+		if(propertiesLoader.getProperty("editormode").equals("false"))
+		{
+			this.editorMode = false;
+			
+		}
+		else {
+			this.editorMode = true;
+		}
+		if(gameBoard!=null) {
+			gameBoard.setMaxRows(Integer.parseInt(propertiesLoader.getProperty("maxrows")));
+			gameBoard.setMaxCols(Integer.parseInt(propertiesLoader.getProperty("maxcols")));
+		}
+	}
+	// this ensures the singleton nature and INSTANCE can be used to call the
+	// functions
 	private GameEngine() {
 		System.err.println("Game engine created");
+		loadProperties();
 		renderer = new Renderer();
-		gameBoard = null;
+		gameBoard = new GameBoard();
+
 		this.init();
-		
-		
 	}
-	
+
 	private GameStates gameState;
-	
 
 	public void init() {
-		System.err.println("Init.");
+		
 		setGameState(GameStates.SETUP);
-		System.err.println("Gamestate:"+getGameState().toString());
 		
-		renderer.setEditorMode(true);//displays all cells
+		renderer.setEditorMode(false);// displays all cells if in editor mode
 	}
-	public boolean void checkUserGridInput(String gridInput) {
-			renderer.renderSetupBoard();
-			gridSizeInput = scanner.nextLine().replaceAll("\\s", "");
-			
-			if(NumberUtils.isParsable(gridSizeInput))
-			{
-				System.err.println("gridSizeInput is parsable:"+gridSizeInput+".");
-				gridSize = Integer.parseInt(gridSizeInput);
-				gridCountIsValid = GameBoard.validateGrid(gridSize, gridSize,gameBoard.getMaxRows(),gameBoard.getMaxCols());
-			}
-			
-			else
-			{
-				System.err.println("gridSize is not parsable");
-			}
-			
-		return 
-	}
+
 	public void gameSetup() {
-		System.err.println("Gameboard Setup.");
 		
-		boolean gridCountIsValid = false;
-		String gridSizeInput;
-		int gridSize = 0;
-		do
-		{
-			renderer.renderSetupBoard();
-			gridSizeInput = scanner.nextLine().replaceAll("\\s", ""); //deletes any spaces in the input, be it in front , behind, or inbetween
-			
-			if(NumberUtils.isParsable(gridSizeInput))
-			{
-				System.err.println("gridSizeInput is parsable:"+gridSizeInput+".");
-				gridSize = Integer.parseInt(gridSizeInput);
-				gridCountIsValid = GameBoard.validateGrid(gridSize, gridSize,gameBoard.getMaxRows(),gameBoard.getMaxCols());
-			}
-			else
-			{
-				System.err.println("gridSize is not parsable");
-			}
-			
-			
-			
-		}
-		while(!gridCountIsValid);
-	
-		
-		//gridSize.
-		boolean minesCountIsValid = false;
-		int numMines = -1;
-		
-		do
-		{
-			renderer.renderSetMines();
-			numMines = scanner.nextInt();
-			
-			//validateParameters returns true when its valid 
-			minesCountIsValid = GameBoard.validateMineCount(gridSize, gridSize, numMines);
-			
+		loadProperties();
+		renderer.setEditorMode(this.editorMode);
 
-		}
-		while(!minesCountIsValid);
-	
-
+		Cell rowCol = getGridDimensions();
+		int numMines = getMinesCount(rowCol);
 		
-		gameBoard = new GameBoard(gridSize,gridSize,numMines);
+		gameBoard = new GameBoard(rowCol.getRow(), rowCol.getCol(), numMines);
+		this.numberOfMovesMade = 0;
 		setGameState(GameStates.ONGOING);
 	}
-	
+
+	private Cell getGridDimensions() {
+		Cell rowColFromInput = new Cell(); // just using it to store the row/col. Game currently takes one dimension and
+											// makes board a square, but this design makes its possible in the future
+											// for a rectangle board
+		boolean gridCountIsValid = false;
+		Integer gridSizeInput;
+		int gridSize = 0;
+
+		do {
+			renderer.renderSetupBoard();
+			gridSizeInput = UserInput.getUserGridSizeInput(); // null if not parsable
+
+			if (gridSizeInput != null) {
+				gridSize = gridSizeInput.intValue();
+				gridCountIsValid = GameBoard.validateGrid(gridSize, gridSize, gameBoard.getMaxRows(),
+						gameBoard.getMaxCols());
+			}
+		} while (!gridCountIsValid);
+
+		rowColFromInput.setRow(gridSize);
+		rowColFromInput.setCol(gridSize);
+
+		return rowColFromInput;
+	}
+
+	private int getMinesCount(Cell rowCol) {
+		int minesCount = 0;
+		boolean minesCountIsValid = false;
+		Integer minesInput;
+
+		do {
+			renderer.renderSetMines();
+			minesInput = UserInput.getUserMinesInput(); // null if not parsable
+
+			if (minesInput != null) {
+				minesCount = minesInput.intValue();
+				minesCountIsValid = GameBoard.validateMineCount(rowCol.getRow(), rowCol.getCol(), minesCount);
+			}
+
+		} while (!minesCountIsValid);
+
+		return minesCount;
+	}
+
 	public void gameInProgress() {
 		System.err.println("Game started.");
-		
-		if(gameBoard==null)
-		{
+
+		if (gameBoard == null) {
 			System.err.println("Gameboard not initialized");
 			setGameState(GameStates.TERMINATE);
 			return;
 		}
-		
-		
-		
-		renderer.startGame(gameBoard);
 
-		
-		boolean cellInputIsValid = false;
-		
-		do
+		renderer.startGame(gameBoard);
+		// steppedOnMine = -1 , Gamewon = 0 , GameContinue = 1 , redundantMove = 2
+		int playerMoveResult = 1;
+
+		do {
+			// this repeated gets input until its valid and parses into a cell
+			Cell cellFromInput = getValidUserCellInput();
+
+			playerMoveResult = playerMove(cellFromInput);
+			if (playerMoveResult > 0) {
+				renderer.update(gameBoard);
+			}
+
+		} while (playerMoveResult > 0);
+
+		if (playerMoveResult == -1)// stepped on mine
 		{
-			Cell cell = UserInput.getUserCellInput();
-			
-	
-			//validateParameters returns true when its valid 
-			cellInputIsValid = GameBoard.validateInputtedCell(cell);
-			
-			renderer.update(gameBoard);
-		}
-		while(!cellInputIsValid);
-		
-		
-		boolean steppedOnMine = false;
-		boolean allCellsOpened = false;
-		
-		int numMines = -1;
-		
-		do
+			renderer.playerSelectedMine();
+			renderer.displayGameBoard(gameBoard, true);
+			// check if user wants to restart game
+			if (UserInput.userPressedAnyKey()) {
+				setGameState(GameStates.SETUP);
+			}
+		} else if (playerMoveResult == 0)// stepped on mine
 		{
-			Cell cell = UserInput.getUserCellInput();
-			
-			
-			
-			//validateParameters returns true when its valid 
-			//minesCountIsValid = GameBoard.validateMineCount(gridSize, gridSize, numMines);
-			
-			renderer.update(gameBoard);
+			renderer.gameWon();
+			renderer.displayGameBoard(gameBoard, false);
+			// check if user wants to restart game
+			if (UserInput.userPressedAnyKey()) {
+				setGameState(GameStates.SETUP);
+			}
 		}
-		while(steppedOnMine == false && allCellsOpened == false);
-		
-		
-		
-		setGameState(GameStates.TERMINATE);
+
+		// setGameState(GameStates.TERMINATE);
 	}
-	
-	public void update() {
-		
-		System.err.println("Start game loop");
-		
-		while(getGameState() != GameStates.TERMINATE)
+
+	private Cell getValidUserCellInput() {
+
+		boolean cellInputIsValid = false;
+		Cell cellFromInput = null;
+		do {
+			renderer.requestUserCellInput();
+
+			String userInputtedString = UserInput.getUserCellInput(5); // ZZ999 max input, ZZ denotes 676
+
+			if (userInputtedString != null) {
+				cellFromInput = GameBoard.parseStringToCell(userInputtedString);
+				if (cellFromInput != null) {
+
+					cellInputIsValid = gameBoard.validateInputtedCell(cellFromInput, gameBoard.getNumRows(),
+							gameBoard.getNumCols());
+
+				}
+			}
+		} while (!cellInputIsValid);
+
+		return cellFromInput;
+	}
+
+	public int playerMove(Cell cellCoords) {
+		// steppedOnMine = -1 , Gamewon = 0 , GameContinue = 1 , redundantMove = 2
+		int playerMoveResult = 1;
+		Cell cell = gameBoard.getCellFromGrid(cellCoords); // the player inputed cell only contains x,y coord
+		if (gameBoard.isCellRevealed(cell)) // redundant/invalid move but allowed
 		{
-			System.err.println("Game loop");
-			switch(getGameState())
+			renderer.playerSelectedRevealedCell();
+			playerMoveResult = 2;
+			return playerMoveResult;
+		}
+
+		if (this.numberOfMovesMade == 0 && cell.isMine()) { // for first move, game is lenient and swap away the mine
+			gameBoard.replaceMine(cell);
+			cell.setMine(false);//because this is still the 'old' cell which still set as a mine
+		}
+
+		if (cell.isMine()) {
+			playerMoveResult = -1; // gameover
+
+		} else {
+
+			// If its a cell with adj mines, simply reveal and end this turn
+			if (cell.getAdjacentMines() > 0) {
+
+				gameBoard.revealCell(cell);
+				renderer.playerSelectedCellwithAdjMines(cell.getAdjacentMines());
+
+			} else // when selected empty cell, recursively open cells
 			{
-				case SETUP:
-					//
-					gameSetup();
-                    break;
-                    
-				case ONGOING:
-					gameInProgress();
-					//renderer.update(gameBoard);
-					break;
-				default:
-					break;
-					
-				
+
+				ConcurrentHashMap<String, Cell> cellsMap = new ConcurrentHashMap<>();
+				ConcurrentHashMap<String, Cell> evaluatedCellsMap = new ConcurrentHashMap<>();
+
+				cellsMap.put(cell.toString(), cell);
+
+				gameBoard.openEmptyCells(cellsMap, evaluatedCellsMap);
+				playerMoveResult = 1;
+			}
+		}
+
+		if (gameBoard.isGameWon()) {
+			playerMoveResult = 0;
+		}
+		this.numberOfMovesMade++;
+		return playerMoveResult;
+	}
+
+	public void update() {
+
+		while (getGameState() != GameStates.TERMINATE) {
+			
+			switch (getGameState()) {
+			case SETUP:
+				//
+				gameSetup();
+				break;
+
+			case ONGOING:
+				gameInProgress();
+				// renderer.update(gameBoard);
+				break;
+			default:
+				break;
 
 			}
-			
-
-			
-			
 		}
-		
-		
-		System.err.println("Gamestate:"+getGameState().toString());
-		
+
 	}
-	
-	
-	
+
 	public GameStates getGameState() {
 		return this.gameState;
-		
+
 	}
+
 	public void setGameState(GameStates state) {
 		this.gameState = state;
-		
+
 	}
-	
-	
-	
+
 	public void close() {
 		setGameState(GameStates.TERMINATE);
 	}
-	
-	
-}
 
+}

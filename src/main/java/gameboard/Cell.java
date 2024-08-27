@@ -1,5 +1,7 @@
 package gameboard;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,42 +10,41 @@ import lombok.Setter;
 //The individual cell objects in the grid on the gameboard, could have used record type too
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
+//@NoArgsConstructor
+//@EqualsAndHashCode
 public class Cell {
 
 		private int row,col;
-	    private boolean isMine;
-	    private boolean revealed;
-	    private int adjacentMines;
+	    private boolean isMine = false;
+	    private boolean isRevealed = false;
+	    private int adjacentMines = 0;
 	    	
 
-	    /*
+	    
 	    public Cell() {
 	        this.isMine = false;
-	        this.revealed = false;
+	        this.isRevealed = false;
 	        this.adjacentMines = 0;
 	    }
-
-	    public void setMine() {
-	        this.isMine = true;
+	    public Cell(Cell cell) {
+	    	this.row = cell.getRow();
+	    	this.col = cell.getCol();
+	    	this.isMine = cell.isMine();
+	        this.isRevealed = cell.isRevealed();
+	        this.adjacentMines = cell.getAdjacentMines();
+	      
 	    }
-
-	    public boolean isMine() {
-	        return isMine;
+	    @Override
+	    public int hashCode() {
+	    	final int PRIME = 31;
+	        return this.row * 31 + this.col;
 	    }
-
 	    
-
-	    public boolean isRevealed() {
-	        return revealed;
+	    @Override
+	    public String toString() {
+	    	
+	        return "Cell(Row=" + this.row + ", Col=" + this.col+")";
 	    }
-
-	    public void setAdjacentMines(int count) {
-	        this.adjacentMines = count;
-	    }
-
-	    public int getAdjacentMines() {
-	        return adjacentMines;
-	    }
-	*/
+	  
 }
