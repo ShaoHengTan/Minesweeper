@@ -36,5 +36,7 @@ on the grid
 
 Note: 
 -Java/JDK 17 needs to be installed in the system and added to PATH variables for the command line command 'java' to run.
+
 -Standalone/portable Java can also be used. If so , simply run "setlocal" then "path=<PATH OF STANDALONE>;%path%" in command prompt before running the "java -jar Minesweeper-app.jar" command. Or add these 2 lines into the top of rungame.bat.
+
 -"https://www.openlogic.com/openjdk-downloads" for Standalone/portable JDK
