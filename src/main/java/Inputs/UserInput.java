@@ -36,12 +36,11 @@ public class UserInput {
 		String gridSizeInput = UserInput.getUserNonNullStringInput();
 
 		if (NumberUtils.isParsable(gridSizeInput)) {
-			System.err.println("gridSizeInput is parsable:" + gridSizeInput + ".");
-
+			
 			input = Integer.parseInt(gridSizeInput);
 
 		} else {
-			System.err.println("GridSize intput is not parsable.");
+			
 			input = null;
 		}
 
@@ -53,10 +52,10 @@ public class UserInput {
 		String minesInput = UserInput.getUserNonNullStringInput();
 
 		if (NumberUtils.isParsable(minesInput)) {
-			System.err.println("Mines input is parsable:" + minesInput + ".");
+			//System.err.println("Mines input is parsable:" + minesInput + ".");
 			input = Integer.parseInt(minesInput);
 		} else {
-			System.err.println("Mines input is not parsable.");
+			//System.err.println("Mines input is not parsable.");
 			input = null;
 		}
 
