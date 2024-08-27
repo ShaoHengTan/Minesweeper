@@ -7,7 +7,7 @@ How to run:
 2) Run the rungame.bat.
   -or-
 2) Open command prompt and navigate to the folder path containing the JAR.
-3) Run the following command "java -jar Minesweeper-app.jar" or "java -jar <path>\Minesweeper-app.jar". For example "java -jar D:\Program Files\Minesweeper-app\Release\Minesweeper-app.jar".
+3) Run the following command "java -jar Minesweeper-app.jar" or "java -jar (path)\Minesweeper-app.jar". For example "java -jar D:\Program Files\Minesweeper-app\Release\Minesweeper-app.jar".
 
 Requirements:
 1) Java 17 environment
